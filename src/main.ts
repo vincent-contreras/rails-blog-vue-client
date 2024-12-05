@@ -12,8 +12,12 @@ import App from './App.vue'
 
 // Composables
 import { createApp } from 'vue'
+import { useAxios } from '@/composables/useAxios';
 
 const app = createApp(App)
+
+const axiosInstance = useAxios(); // Initialize the Axios instance
+app.provide('axios', axiosInstance); // Provide Axios globally
 
 registerPlugins(app)
 
