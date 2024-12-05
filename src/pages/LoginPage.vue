@@ -1,7 +1,7 @@
 <template>
   <v-container class="primary fill-height d-flex justify-center align-center">
     <v-card shaped>
-      <v-form v-model="validFormFlag">
+      <v-form ref="form" validate-on="submit lazy" @submit.prevent="loginSubmit">
         <v-toolbar>
           <v-toolbar-title>Login</v-toolbar-title>
           <v-spacer></v-spacer>
@@ -13,13 +13,17 @@
               label="Username"
               type="text"
               v-model="username"
+              :rules="usernameRules"
+              required
             ></v-text-field>
             <v-text-field
               prepend-icon="mdi-lock"
               label="Password"
               type="password"
               v-model="password"
+              :rules="passwordRules"
               @keyup.enter="loginSubmit"
+              required
             ></v-text-field>
           </v-container>
         </v-card-text>
@@ -44,6 +48,7 @@
 
 <script>
 import { defineComponent, ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   name: 'LogIn',
@@ -51,27 +56,34 @@ export default defineComponent({
     source: String
   },
   setup(props, { root }) {
-    const validFormFlag = ref(false);
     const username = ref(null);
+    const usernameRules = ref([(v) => !!v || "Username is required"]);
     const password = ref(null);
+    const passwordRules = ref([(v) => !!v || "Password is required"]);
+    const form = ref(null);
+
+    const router = useRouter();
 
     onMounted(() => {
-      const loggedInUser = root.$store.getters.loggedInUser;
-      if (!loggedInUser) return;
+      // const loggedInUser = root.$store.getters.loggedInUser;
+      // if (!loggedInUser) return;
 
-      if (loggedInUser.role === 'Admin') {
-        root.$router.push({ name: 'AdminMain' });
-      } else {
-        root.$router.push({ name: 'Main' });
-      }
+      // if (loggedInUser.role === 'Admin') {
+      //   root.$router.push({ name: 'AdminMain' });
+      // } else {
+      //   root.$router.push({ name: 'Main' });
+      // }
     });
 
-    const loginSubmit = () => {
-      // Implement login logic here
+    const loginSubmit = async () => {
+      if (form.value) {
+        const { valid } = await form.value.validate();
+        if (valid) alert('Form is valid');
+      }
     };
 
     const goToSignupPage = () => {
-
+      router.push({ name: 'register' });
     };
 
     const goToAuthRecoveryPage = () => {
@@ -79,9 +91,11 @@ export default defineComponent({
     };
 
     return {
-      validFormFlag,
+      form,
       username,
+      usernameRules,
       password,
+      passwordRules,
       loginSubmit,
       goToSignupPage,
       goToAuthRecoveryPage

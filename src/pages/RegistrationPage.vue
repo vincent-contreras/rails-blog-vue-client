@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container class="primary fill-height d-flex justify-center align-center">
     <v-card>
       <v-container>
         <v-card-title class="justify-center">
@@ -7,14 +7,19 @@
         </v-card-title>
         <v-form
           ref="form"
-          v-model="validForm"
-          lazy-validation
+          validate-on="submit lazy" @submit.prevent="submitForm"
         >
           <v-text-field
             v-model="firstName"
             :rules="firstNameRules"
             prepend-icon="mdi-account"
             label="First Name"
+            required
+          />
+          <v-text-field
+            v-model="middleName"
+            prepend-icon="mdi-account"
+            label="Middle Name"
             required
           />
           <v-text-field
@@ -71,8 +76,7 @@
                 block
                 large
                 color="primary"
-                type="button"
-                @click="submitForm"
+                type="submit"
               >
                 Register
               </v-btn>
@@ -111,15 +115,18 @@
 <script>
 import { ref } from "vue";
 import GlobalMixin from "../mixins/GlobalMixin.vue";
+import { useRouter } from 'vue-router';
 
 export default {
   name: "SignupForm",
   mixins: [GlobalMixin],
   setup() {
+    const router = useRouter();
     const showSuccessModal = ref(false);
-    const validForm = ref(false);
+    const form = ref(null);
     const firstName = ref(null);
     const firstNameRules = ref([(v) => !!v || "First name is required"]);
+    const middleName = ref(null);
     const lastName = ref(null);
     const lastNameRules = ref([(v) => !!v || "Last name is required"]);
     const email = ref(null);
@@ -148,28 +155,35 @@ export default {
 
     const goToLoginPage = () => {
       // Define your navigation logic here
+      router.push({ name: 'login' });
     };
 
     const submitForm = async () => {
-      const form = document.querySelector("v-form");
-      if (!(await form.validate())) {
-        return;
+
+      if (form.value) {
+        const { valid } = await form.value.validate();
+        if (valid) alert('Form is valid');
       }
 
-      try {
-        // add api call here
-        showSuccessModal.value = true;
-      } catch (err) {
-        alert(err.response.data.message);
-        console.error(err);
-      }
+      // if (!(await form.validate())) {
+      //   return;
+      // }
+
+      // try {
+      //   // add api call here
+      //   showSuccessModal.value = true;
+      // } catch (err) {
+      //   alert(err.response.data.message);
+      //   console.error(err);
+      // }
     };
 
     return {
       showSuccessModal,
-      validForm,
+      form,
       firstName,
       firstNameRules,
+      middleName,
       lastName,
       lastNameRules,
       email,
